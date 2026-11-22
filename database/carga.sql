@@ -12,7 +12,9 @@ INSERT INTO tema (nome_tema, descricao) VALUES
 INSERT INTO grupo (nome_grupo) VALUES
 ('Estudantes'), ('Professores'), ('Funcionários');
 
-INSERT INTO usuario (nome, email) VALUES
+INSERT INTO usuario (nome, email, senha_hash)
+SELECT dados.nome, dados.email, crypt('Teste123!', gen_salt('bf', 10))
+FROM (VALUES
 ('Eduardo Abreu', 'eduardo.uel@uel.br'),
 ('Caio Rossate', 'CaioR.uel@uel.br'),
 ('Pedro Goes', 'pg.uel@uel.br'),
@@ -32,7 +34,8 @@ INSERT INTO usuario (nome, email) VALUES
 ('Pedro Paulo', 'PP.uel@uel.br'),
 ('Carmen Lucia', 'CarmenL.uel@uel.br'),
 ('Jones Marcos', 'JonesM.uel@uel.br'),
-('Paula Senise', 'Pseniseg.uel@uel.br');
+('Paula Senise', 'Pseniseg.uel@uel.br')
+) AS dados(nome, email);
 
 INSERT INTO grupo_usuario (id_usu, id_grupo)
 SELECT id_usu,

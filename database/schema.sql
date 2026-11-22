@@ -1,10 +1,14 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE usuario (
     id_usu integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome varchar(120) NOT NULL,
     email varchar(180) NOT NULL UNIQUE,
-    CONSTRAINT ck_usuario_nome CHECK (btrim(nome) <> '')
+    senha_hash varchar(255) NOT NULL,
+    CONSTRAINT ck_usuario_nome CHECK (btrim(nome) <> ''),
+    CONSTRAINT ck_usuario_senha CHECK (btrim(senha_hash) <> '')
 );
 
 CREATE TABLE grupo (
