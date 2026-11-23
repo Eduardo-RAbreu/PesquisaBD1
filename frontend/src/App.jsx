@@ -1,122 +1,72 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
+import { useAuth } from './AuthContext.jsx'
+import Protegida from './componentes/Protegida.jsx'
+import Inicio from './paginas/Inicio.jsx'
+import Login from './paginas/Login.jsx'
+import Temas from './paginas/Temas.jsx'
+import Questoes from './paginas/Questoes.jsx'
+import QuestaoForm from './paginas/QuestaoForm.jsx'
+import Grupos from './paginas/Grupos.jsx'
+import Usuarios from './paginas/Usuarios.jsx'
+import Pesquisas from './paginas/Pesquisas.jsx'
+import PesquisaForm from './paginas/PesquisaForm.jsx'
+import Responder from './paginas/Responder.jsx'
+import ResponderForm from './paginas/ResponderForm.jsx'
+import Relatorios from './paginas/Relatorios.jsx'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const { usuario, sair } = useAuth()
+  const navigate = useNavigate()
+
+  async function sairDoSistema() {
+    await sair()
+    navigate('/login')
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+      <header className="topo">
+        <Link className="marca" to="/">Pesquisas</Link>
+        <nav>
+          <NavLink to="/responder">Responder</NavLink>
+          <NavLink to="/pesquisas">Pesquisas</NavLink>
+          <NavLink to="/questoes">Questões</NavLink>
+          <NavLink to="/temas">Temas</NavLink>
+          <NavLink to="/grupos">Grupos</NavLink>
+          <NavLink to="/usuarios">Usuários</NavLink>
+          <NavLink to="/relatorios">Relatórios</NavLink>
+        </nav>
+        <div className="conta">
+          {usuario ? (
+            <>
+              <span>{usuario.nome}</span>
+              <button type="button" className="link-simples" onClick={sairDoSistema}>Sair</button>
+            </>
+          ) : (
+            <Link to="/login">Entrar</Link>
+          )}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <main>
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/temas" element={<Temas />} />
+          <Route path="/questoes" element={<Questoes />} />
+          <Route path="/questoes/nova" element={<QuestaoForm />} />
+          <Route path="/questoes/:id/editar" element={<QuestaoForm />} />
+          <Route path="/grupos" element={<Grupos />} />
+          <Route path="/usuarios" element={<Usuarios />} />
+          <Route path="/pesquisas" element={<Pesquisas />} />
+          <Route path="/pesquisas/nova" element={<PesquisaForm />} />
+          <Route path="/pesquisas/:id/editar" element={<PesquisaForm />} />
+          <Route path="/responder" element={<Protegida><Responder /></Protegida>} />
+          <Route path="/responder/:id" element={<Protegida><ResponderForm /></Protegida>} />
+          <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="*" element={<p className="vazio">Página não encontrada.</p>} />
+        </Routes>
+      </main>
     </>
   )
 }
-
-export default App
