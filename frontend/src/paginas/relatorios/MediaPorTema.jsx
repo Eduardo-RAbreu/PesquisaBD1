@@ -9,7 +9,7 @@ export default function MediaPorTema() {
   const [de, setDe] = useState('')
   const [ate, setAte] = useState('')
   const [minRespostas, setMinRespostas] = useState(1)
-  // os filtros só valem depois de apertar Filtrar
+  // os filtros só valem depois de apertar "Filtrar"
   const [filtros, setFiltros] = useState({ de: '', ate: '', minRespostas: 1 })
 
   const params = new URLSearchParams({ minRespostas: String(filtros.minRespostas) })
@@ -57,7 +57,7 @@ export default function MediaPorTema() {
                 <XAxis dataKey="nomeTema" />
                 <YAxis domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
                 <Tooltip formatter={(valor) => formatarNota(valor)} />
-                <Bar dataKey="media" name="Média" fill="#0e6a70" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="media" name="Média" fill="#1B4E77" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

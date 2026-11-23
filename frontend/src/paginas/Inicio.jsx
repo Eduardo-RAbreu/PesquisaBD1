@@ -13,10 +13,27 @@ const PASSOS = [
 export default function Inicio() {
   return (
     <>
-      <h1>Pesquisas de satisfação</h1>
-      <p className="subtitulo">
-        Cadastre as perguntas, monte pesquisas, aplique aos grupos e acompanhe os resultados.
-      </p>
+      <section className="hero">
+        <div className="hero-texto">
+          <h1>Pesquisas de satisfação</h1>
+          <p className="subtitulo">
+            Cadastre as perguntas, monte pesquisas, aplique aos grupos e acompanhe os resultados.
+          </p>
+          <div className="hero-acoes">
+            <Link className="botao botao-coral" to="/responder">Responder uma pesquisa</Link>
+            <Link className="botao-contorno" to="/relatorios">Ver relatórios</Link>
+          </div>
+        </div>
+
+        {/* enfeite: a escala de 1 a 5 que as pesquisas usam */}
+        <div className="hero-escala" aria-hidden="true">
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+          <span className="cheia">4</span>
+          <span className="cheia">5</span>
+        </div>
+      </section>
 
       <div className="cartoes">
         {PASSOS.map((p, i) => (

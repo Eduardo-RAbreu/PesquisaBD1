@@ -5,7 +5,7 @@ import { useDados } from '../../useDados.js'
 import Aviso from '../../componentes/Aviso.jsx'
 
 // Relatório 5: quem já respondeu e quem ainda não respondeu uma pesquisa.
-// Usa só o registro de quem respondeu
+// Usa só o registro de "quem respondeu"; as respostas em si não entram aqui.
 export default function Adesao() {
   const [escolhida, setEscolhida] = useState('')
   const { dados: pesquisas } = useDados('/api/pesquisas')
@@ -50,8 +50,8 @@ export default function Adesao() {
                 <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="esperados" name="Deviam responder" fill="#b9c6cb" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="respondidos" name="Já responderam" fill="#0e6a70" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="esperados" name="Deviam responder" fill="#7F8F9C" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="respondidos" name="Já responderam" fill="#1B4E77" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -47,7 +47,13 @@ export default function RankingQuestoes() {
     })
   }
 
-  const barras = (dados ?? []).map((q) => ({ ...q, rotulo: `${q.posicao}º ${cortar(q.descricao, 34)}` }))
+  // em tela estreita, os rótulos do gráfico ficam mais curtos (o texto inteiro está na tabela)
+  const estreito = typeof window !== 'undefined' && window.innerWidth < 700
+  const larguraRotulo = estreito ? 120 : 270
+  const barras = (dados ?? []).map((q) => ({
+    ...q,
+    rotulo: `${q.posicao}º ${cortar(q.descricao, estreito ? 12 : 30)}`,
+  }))
 
   return (
     <section>
@@ -100,12 +106,12 @@ export default function RankingQuestoes() {
               <BarChart data={barras} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
-                <YAxis type="category" dataKey="rotulo" width={270} tick={{ fontSize: 12 }} />
+                <YAxis type="category" dataKey="rotulo" width={larguraRotulo} tick={{ fontSize: 12 }} />
                 <Tooltip
                   formatter={(valor) => formatarNota(valor)}
                   labelFormatter={(rotulo, itens) => itens?.[0]?.payload?.descricao ?? rotulo}
                 />
-                <Bar dataKey="media" name="Média" fill="#0e6a70" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="media" name="Média" fill="#1B4E77" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

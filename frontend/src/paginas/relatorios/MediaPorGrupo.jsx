@@ -41,7 +41,7 @@ export default function MediaPorGrupo() {
                 <XAxis dataKey="nomeGrupo" />
                 <YAxis domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
                 <Tooltip formatter={(valor) => formatarNota(valor)} />
-                <Bar dataKey="media" name="Média" fill="#0e6a70" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="media" name="Média" fill="#1B4E77" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

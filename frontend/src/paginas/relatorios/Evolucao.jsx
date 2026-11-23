@@ -49,8 +49,8 @@ export default function Evolucao() {
                   labelFormatter={(rotulo, itens) => itens?.[0]?.payload?.titulo ?? rotulo}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="media" name="Média da pesquisa" stroke="#0e6a70" strokeWidth={2.5} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="mediaGeral" name="Média geral" stroke="#b9852c" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+                <Line type="monotone" dataKey="media" name="Média da pesquisa" stroke="#1B4E77" strokeWidth={2.5} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="mediaGeral" name="Média geral" stroke="#C24A22" strokeWidth={2} strokeDasharray="6 4" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
