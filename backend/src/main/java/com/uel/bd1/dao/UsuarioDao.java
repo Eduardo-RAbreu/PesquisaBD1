@@ -160,6 +160,44 @@ public class UsuarioDao {
         }
     }
 
+    public Usuario autenticar(String email, String senha) throws SQLException {
+        if (senha == null || senha.isBlank()
+                || senha.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new IllegalArgumentException(
+                "Informe uma senha não vazia."
+            );
+        }
+        if (email == null || email.isBlank() || email.length() > 180) {
+            throw new IllegalArgumentException("Informe um e-mail não vazio, com até 180 caracteres.");
+        }
+
+        String sql = """
+                Select id_usu, nome, email
+                from usuario
+                where email = ? and senha_hash = crypt(?, senha_hash)
+                """;
+        
+         try (
+            Connection conexao = dataSource.getConnection();
+            PreparedStatement comando = conexao.prepareStatement(sql)
+        ) {
+            comando.setString(1, email);
+            comando.setString(2, senha);
+            try (ResultSet resultado = comando.executeQuery()) {
+                if (resultado.next()) {
+                    return new Usuario(
+                        resultado.getInt("id_usu"),
+                        resultado.getString("nome"),
+                        resultado.getString("email")
+                    );
+                }
+            }
+        }
+        return null;
+        
+    }
+
+
     private void validarDados(Usuario dados) {
         if (dados == null) {
             throw new IllegalArgumentException("Os dados do usuário são obrigatórios.");
