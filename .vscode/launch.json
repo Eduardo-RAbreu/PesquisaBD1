@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Iniciar backend",
+      "request": "launch",
+      "mainClass": "com.uel.bd1.Bd1Application",
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env"
+    }
+  ]
+}

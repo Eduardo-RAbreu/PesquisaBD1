@@ -174,7 +174,7 @@ public class QuestaoDao {
             return comando.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            if ("23503".equals(e.getSQLState())) {
+            if ("23503".equals(e.getSQLState()) || "23001".equals(e.getSQLState())) {
                 throw new IllegalArgumentException(
                     "Não é possível excluir uma questão vinculada "
                     + "a pesquisas ou respostas.",
