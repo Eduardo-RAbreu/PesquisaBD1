@@ -1,6 +1,8 @@
 package com.uel.bd1.dao;
 
 import com.uel.bd1.model.Grupo;
+import com.uel.bd1.model.Usuario;
+
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -148,6 +150,99 @@ public class GrupoDao {
             }
             throw e;
         }
+    }
+
+
+    public boolean adicionarUsuario(int idGrupo, int idUsuario) throws SQLException{
+        if(idGrupo <= 0  || idUsuario <=0){
+            throw new IllegalArgumentException("Informe IDs positivos para a consulta.");
+        }
+
+        String sql ="""
+                Insert into grupo_usuario(id_usu, id_grupo)
+                values(?, ?)
+                """;
+        
+        try (
+            Connection conexao = dataSource.getConnection();
+            PreparedStatement comando = conexao.prepareStatement(sql)
+        ) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idGrupo);
+            return comando.executeUpdate() > 0;
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) {
+                throw new IllegalArgumentException(
+                "Esse usuário já pertence ao grupo.", e
+                );
+            }
+
+            if ("23503".equals(e.getSQLState())) {
+                throw new IllegalArgumentException(
+                "O usuário ou o grupo informado não existe.", e
+                );
+            }
+
+            throw e;
+        }
+    }
+
+    public boolean removerUsuario(int idGrupo, int idUsuario) throws SQLException{
+        if(idGrupo <= 0  || idUsuario <=0){
+            throw new IllegalArgumentException("Informe IDs positivos para a consulta.");
+        }
+
+        String sql ="""
+                Delete from grupo_usuario
+                where id_usu = ? and id_grupo = ?
+                """;
+    
+        try (
+            Connection conexao = dataSource.getConnection();
+            PreparedStatement comando = conexao.prepareStatement(sql)
+        ) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idGrupo);
+            return comando.executeUpdate() > 0;
+        } 
+    }
+
+    public List<Usuario> listarUsuarios(int idGrupo) throws SQLException {
+
+        if (idGrupo <= 0) {
+            throw new IllegalArgumentException(
+                "Informe um ID de grupo positivo."
+            );
+        }
+
+        List<Usuario> registros = new ArrayList<>();
+
+        String sql = """
+            SELECT u.id_usu, u.nome, u.email
+            FROM grupo_usuario g
+            JOIN usuario u ON u.id_usu = g.id_usu
+            WHERE g.id_grupo = ?
+            ORDER BY u.nome, u.id_usu
+            """;
+
+        try (
+            Connection conexao = dataSource.getConnection();
+            PreparedStatement comando = conexao.prepareStatement(sql)
+        ) {
+            comando.setInt(1, idGrupo);
+
+            try (ResultSet resultado = comando.executeQuery()) {
+                while (resultado.next()) {
+                        registros.add(new Usuario(
+                        resultado.getInt("id_usu"),
+                        resultado.getString("nome"),
+                        resultado.getString("email")
+                    ));
+                }
+            }
+        }
+
+        return registros;
     }
 
     private void validarGrupo(Grupo dados) {

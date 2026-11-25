@@ -1,6 +1,7 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.PesquisaDao;
+import com.uel.bd1.model.Grupo;
 import com.uel.bd1.model.Pesquisa;
 
 import org.springframework.http.HttpStatus;
@@ -99,5 +100,38 @@ public class PesquisaController {
         return ResponseEntity
             .badRequest()
             .body(e.getMessage());
+    }
+
+    @GetMapping("/{id}/grupos")
+    public List<Grupo> listarGrupos(@PathVariable("id") int id) throws SQLException {
+        return dao.listarGrupos(id);
+    }
+
+    @PostMapping("/{id}/{idg}")
+    public ResponseEntity<String> inserirUsuario(@PathVariable("id") int id, @PathVariable("idg") int idg) throws SQLException {
+
+        boolean inseriu = dao.adicionarGrupo(idg, id);
+
+        if (!inseriu) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Não foi possível cadastrar o grupo na pesquisa.");
+        }
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body("Grupo cadastrado com sucesso na pesquisa.");
+    }
+
+     @DeleteMapping("/{id}/{idg}")
+    public ResponseEntity<Void> deletarGrupo(@PathVariable("id") int id, @PathVariable("idg") int idg) throws SQLException {
+
+        boolean deletou = dao.removerGrupo(idg, id);
+
+        if (!deletou) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
