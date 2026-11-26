@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from './api.js'
 
-// Busca uma URL da API e refaz a busca quando a URL muda
 export function useDados(url) {
   const [versao, setVersao] = useState(0)
   const [estado, setEstado] = useState({ chave: null, dados: null, erro: '' })

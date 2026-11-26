@@ -1,5 +1,5 @@
 async function requisicao(metodo, url, corpo) {
-  const opcoes = { method: metodo, headers: {} }
+  const opcoes = { method: metodo, headers: {}, credentials: 'same-origin' }
   if (corpo !== undefined) {
     opcoes.headers['Content-Type'] = 'application/json'
     opcoes.body = JSON.stringify(corpo)
@@ -14,10 +14,17 @@ async function requisicao(metodo, url, corpo) {
 
   if (resposta.status === 204) return null
 
-  // O back-end devolve erros no formato {"erro": "mensagem"}
-  const dados = await resposta.json().catch(() => null)
+  const texto = await resposta.text()
+  let dados = null
+  if (texto) {
+    try { dados = JSON.parse(texto) } catch { dados = texto }
+  }
   if (!resposta.ok) {
-    throw new Error(dados?.erro ?? 'O servidor não respondeu como esperado. Confira se o back-end está rodando.')
+    if (resposta.status === 401 && url !== '/api/login' && url !== '/api/me') {
+      window.dispatchEvent(new Event('sessao-expirada'))
+    }
+    throw new Error((typeof dados === 'string' ? dados : dados?.erro)
+      || (resposta.status === 401 ? 'Faça login para continuar.' : 'Não foi possível concluir a operação.'))
   }
   return dados
 }
@@ -29,14 +36,12 @@ export const api = {
   delete: (url) => requisicao('DELETE', url),
 }
 
-// "2026-11-27" -> "27/11/2026"
 export function formatarData(iso) {
   if (!iso) return ''
   const [ano, mes, dia] = iso.split('-')
   return `${dia}/${mes}/${ano}`
 }
 
-// 3.5 -> "3,50"  (nulo vira "—")
 export function formatarNota(valor) {
   if (valor === null || valor === undefined) return '—'
   return Number(valor).toFixed(2).replace('.', ',')

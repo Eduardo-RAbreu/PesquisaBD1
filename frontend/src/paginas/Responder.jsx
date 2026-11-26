@@ -58,7 +58,7 @@ export default function Responder() {
                     )}
                   </td>
                   <td className="acoes">
-                    {!p.jaRespondeu && <Link to={`/responder/${p.id}`}>Responder</Link>}
+                    {!p.jaRespondeu && p.situacao === 'ABERTA' && <Link to={`/responder/${p.id}`}>Responder</Link>}
                   </td>
                 </tr>
               ))}

@@ -12,8 +12,8 @@ export default function ResponderForm() {
   const navigate = useNavigate()
   const { dados: pesquisa, erro: erroCarga, carregando } = useDados(`/api/responder/pesquisas/${id}`)
 
-  // respostas: { [idQuestao]: nota (número) ou texto (string) }
   const [respostas, setRespostas] = useState({})
+  const [idGrupoRespondente, setIdGrupoRespondente] = useState('')
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
 
@@ -24,6 +24,11 @@ export default function ResponderForm() {
   async function enviar(evento) {
     evento.preventDefault()
     setErro('')
+
+    if (pesquisa.gruposRespondente.length > 1 && !idGrupoRespondente) {
+      setErro('Escolha o grupo que você representa nesta resposta.')
+      return
+    }
 
     const lista = pesquisa.questoes.map((q) => {
       const valor = respostas[q.idQuestao]
@@ -41,7 +46,10 @@ export default function ResponderForm() {
 
     setEnviando(true)
     try {
-      const resultado = await api.post(`/api/responder/pesquisas/${id}`, { respostas: lista })
+      const resultado = await api.post(`/api/responder/pesquisas/${id}`, {
+        respostas: lista,
+        idGrupoRespondente: idGrupoRespondente ? Number(idGrupoRespondente) : null,
+      })
       navigate('/responder', { state: { mensagem: resultado.mensagem } })
     } catch (e) {
       setErro(e.message)
@@ -75,6 +83,18 @@ export default function ResponderForm() {
       <Aviso tipo="erro">{erro}</Aviso>
 
       <form className="folha-resposta" onSubmit={enviar}>
+        {pesquisa.gruposRespondente.length > 1 && (
+          <div>
+            <label htmlFor="grupoRespondente">Grupo que você representa</label>
+            <select id="grupoRespondente" value={idGrupoRespondente}
+              onChange={(e) => setIdGrupoRespondente(e.target.value)} required>
+              <option value="">Escolha um grupo</option>
+              {pesquisa.gruposRespondente.map((g) => (
+                <option key={g.id} value={g.id}>{g.nomeGrupo}</option>
+              ))}
+            </select>
+          </div>
+        )}
         {pesquisa.questoes.map((q) => (
           <fieldset className="questao-resp" key={q.idQuestao}>
             <legend>{q.ordem}. {q.descricao}</legend>

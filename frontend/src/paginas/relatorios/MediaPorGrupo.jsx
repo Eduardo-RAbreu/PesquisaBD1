@@ -4,7 +4,6 @@ import { formatarData, formatarNota } from '../../api.js'
 import { useDados } from '../../useDados.js'
 import Aviso from '../../componentes/Aviso.jsx'
 
-// Relatório 2: comparação entre grupos de respondentes.
 export default function MediaPorGrupo() {
   const [idPesquisa, setIdPesquisa] = useState('')
   const { dados: pesquisas } = useDados('/api/pesquisas')
@@ -55,7 +54,7 @@ export default function MediaPorGrupo() {
                 {dados.map((g) => (
                   <tr key={g.idGrupo}>
                     <td>{g.nomeGrupo}</td>
-                    <td>{g.media === null ? 'sem respostas' : formatarNota(g.media)}</td>
+                    <td>{g.totalRespostas === 0 ? 'sem respostas' : formatarNota(g.media)}</td>
                     <td>{g.totalRespostas}</td>
                   </tr>
                 ))}

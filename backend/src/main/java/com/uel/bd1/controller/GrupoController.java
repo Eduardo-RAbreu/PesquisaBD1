@@ -1,6 +1,8 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.GrupoDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.model.DadosTela.GrupoTela;
 import com.uel.bd1.model.Grupo;
 import com.uel.bd1.model.Usuario;
 
@@ -16,14 +18,16 @@ import java.util.List;
 public class GrupoController {
 
     private final GrupoDao dao;
+    private final ConsultaDao consulta;
 
-    public GrupoController(GrupoDao dao) {
+    public GrupoController(GrupoDao dao, ConsultaDao consulta) {
         this.dao = dao;
+        this.consulta = consulta;
     }
 
     @GetMapping
-    public List<Grupo> listar() throws SQLException {
-        return dao.listar();
+    public List<GrupoTela> listar() throws SQLException {
+        return consulta.listarGrupos();
     }
 
     @GetMapping("/{id}")

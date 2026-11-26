@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext.jsx'
 import Aviso from '../componentes/Aviso.jsx'
 
-// Login simples apenas com e-mail de um usuário cadastrado
 export default function Login() {
   const { usuario, entrar } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
 
@@ -16,8 +16,8 @@ export default function Login() {
     setErro('')
     setEnviando(true)
     try {
-      await entrar(email)
-      navigate('/responder')
+      await entrar(email, senha)
+      navigate('/', { replace: true })
     } catch (e) {
       setErro(e.message)
     } finally {
@@ -31,7 +31,7 @@ export default function Login() {
         <h1>Entrar</h1>
         <p className="subtitulo">
           Você já está logado como <strong>{usuario.nome}</strong>.{' '}
-          <Link to="/responder">Ir para as pesquisas</Link>
+          <Link to="/">Ir para o início</Link>
         </p>
       </>
     )
@@ -41,7 +41,7 @@ export default function Login() {
     <>
       <h1>Entrar</h1>
       <p className="subtitulo">
-        Informe o e-mail de um usuário cadastrado. Os e-mails estão na página <Link to="/usuarios">Usuários</Link>.
+        Informe o e-mail e a senha de um usuário cadastrado.
       </p>
       <Aviso tipo="erro">{erro}</Aviso>
 
@@ -53,6 +53,15 @@ export default function Login() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <label htmlFor="senha">Senha</label>
+        <input
+          id="senha"
+          type="password"
+          autoComplete="current-password"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
           required
         />
         <div className="botoes">

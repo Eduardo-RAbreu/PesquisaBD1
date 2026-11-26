@@ -1,4 +1,3 @@
-// Mostra erro ou sucesso
 export default function Aviso({ tipo, children }) {
   if (!children) return null
   return (

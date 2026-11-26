@@ -13,24 +13,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uel.bd1.dao.UsuarioDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.service.CadastroService;
+import com.uel.bd1.model.DadosTela.UsuarioTela;
 import com.uel.bd1.model.CadastroUsuarioRequest;
 import com.uel.bd1.model.Usuario;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @RestController 
 @RequestMapping("api/usuarios")
 public class UsuarioController {
     private final UsuarioDao usud;
+    private final ConsultaDao consulta;
+    private final CadastroService cadastro;
 
-    public UsuarioController(UsuarioDao u){
+    public UsuarioController(UsuarioDao u, ConsultaDao consulta, CadastroService cadastro){
         this.usud= u;
+        this.consulta = consulta;
+        this.cadastro = cadastro;
     }
 
     @GetMapping
-    public List<Usuario> listar() throws SQLException{
-        return usud.listar();
+    public List<UsuarioTela> listar() throws SQLException{
+        return consulta.listarUsuarios();
     }
 
     @GetMapping("/{id}")
@@ -44,20 +52,13 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<String> inserir(
+    public ResponseEntity<Map<String, Object>> inserir(
             @RequestBody CadastroUsuarioRequest t) throws SQLException {
 
-        boolean inseriu = usud.inserir(t);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o Usuario.");
-        }
-
+        int id = cadastro.cadastrarUsuario(t);
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body("Usuario cadastrada com sucesso.");
+            .body(Map.of("id", id, "mensagem", "Usuário cadastrado com sucesso."));
     }
 
     @PutMapping("/{id}")

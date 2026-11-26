@@ -49,7 +49,7 @@ public class LoginController {
         return ResponseEntity.ok(usuario);
     }
 
-    @GetMapping("/login")
+    @GetMapping({"/login", "/me"})
     public ResponseEntity<Usuario> consultarLogin(
             HttpServletRequest requisicao) throws SQLException {
 

@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api.js'
 import Aviso from '../componentes/Aviso.jsx'
 
-// cadastrar e editar questões
 export default function QuestaoForm() {
   const { id } = useParams()
   const editando = Boolean(id)

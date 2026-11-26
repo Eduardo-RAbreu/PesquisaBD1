@@ -6,7 +6,7 @@ const PASSOS = [
   { para: '/grupos', titulo: 'Grupos', texto: 'Turmas ou categorias de pessoas que vão responder as pesquisas.' },
   { para: '/usuarios', titulo: 'Usuários', texto: 'As pessoas cadastradas e os grupos a que pertencem.' },
   { para: '/pesquisas', titulo: 'Pesquisas', texto: 'Escolha as questões, a data, o horário e os grupos que devem responder.' },
-  { para: '/responder', titulo: 'Responder', texto: 'Entre com o seu e-mail e responda as pesquisas indicadas para você.' },
+  { para: '/responder', titulo: 'Responder', texto: 'Entre com e-mail e senha e responda as pesquisas indicadas para você.' },
   { para: '/relatorios', titulo: 'Relatórios', texto: 'Tabelas e gráficos que comparam temas, grupos e períodos.' },
 ]
 
@@ -25,7 +25,7 @@ export default function Inicio() {
           </div>
         </div>
 
-        {/* enfeite: a escala de 1 a 5 que as pesquisas usam */}
+
         <div className="hero-escala" aria-hidden="true">
           <span>1</span>
           <span>2</span>

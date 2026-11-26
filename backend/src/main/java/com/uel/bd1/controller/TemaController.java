@@ -1,6 +1,8 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.TemaDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.model.DadosTela.TemaTela;
 import com.uel.bd1.model.Tema;
 
 import org.springframework.http.HttpStatus;
@@ -22,14 +24,16 @@ import java.util.List;
 @RequestMapping("api/temas")
 public class TemaController {
     private final TemaDao temad;
+    private final ConsultaDao consulta;
 
-    public TemaController(TemaDao t){
+    public TemaController(TemaDao t, ConsultaDao consulta){
         this.temad = t;
+        this.consulta = consulta;
     }
 
     @GetMapping
-    public List<Tema> listar() throws SQLException{
-        return temad.listar();
+    public List<TemaTela> listar() throws SQLException{
+        return consulta.listarTemas();
     }
 
     @GetMapping("/{id}")

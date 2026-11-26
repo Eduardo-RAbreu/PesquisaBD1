@@ -143,11 +143,8 @@ public class UsuarioDao {
             throw new IllegalArgumentException("Informe um ID de usuário válido para excluir.");
         }
 
-        String sql = "DELETE FROM usuario WHERE id_usu = ?";
-        try (
-            Connection conexao = dataSource.getConnection();
-            PreparedStatement comando = conexao.prepareStatement(sql)
-        ) {
+        try (Connection conexao = dataSource.getConnection();
+             PreparedStatement comando = conexao.prepareStatement("DELETE FROM usuario WHERE id_usu = ?")) {
             comando.setInt(1, id);
             return comando.executeUpdate() > 0;
         } catch (SQLException e) {

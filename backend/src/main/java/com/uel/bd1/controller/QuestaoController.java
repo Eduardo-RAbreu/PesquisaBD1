@@ -1,6 +1,8 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.QuestaoDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.model.DadosTela.QuestaoTela;
 import com.uel.bd1.model.Questao;
 
 import org.springframework.http.HttpStatus;
@@ -15,21 +17,24 @@ import java.util.List;
 public class QuestaoController {
 
     private final QuestaoDao questaoDao;
+    private final ConsultaDao consulta;
 
-    public QuestaoController(QuestaoDao questaoDao) {
+    public QuestaoController(QuestaoDao questaoDao, ConsultaDao consulta) {
         this.questaoDao = questaoDao;
+        this.consulta = consulta;
     }
 
     @GetMapping
-    public List<Questao> listar() throws SQLException {
-        return questaoDao.listar();
+    public List<QuestaoTela> listar() throws SQLException {
+        return consulta.listarQuestoes();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Questao> buscarPorId(
+    public ResponseEntity<QuestaoTela> buscarPorId(
             @PathVariable("id") int id) throws SQLException {
 
-        Questao questao = questaoDao.listarID(id);
+        QuestaoTela questao = consulta.listarQuestoes().stream()
+            .filter(q -> q.id() == id).findFirst().orElse(null);
 
         if (questao == null) {
             return ResponseEntity.notFound().build();

@@ -1,14 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { api } from './api.js'
 
-// Guarda quem está logado. O back-end mantém a sessão 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
 
-  // verifica se alguem esta logado
   useEffect(() => {
     api.get('/api/me')
       .then(setUsuario)
@@ -16,8 +14,14 @@ export function AuthProvider({ children }) {
       .finally(() => setCarregando(false))
   }, [])
 
-  async function entrar(email) {
-    const logado = await api.post('/api/login', { email })
+  useEffect(() => {
+    const encerrar = () => setUsuario(null)
+    window.addEventListener('sessao-expirada', encerrar)
+    return () => window.removeEventListener('sessao-expirada', encerrar)
+  }, [])
+
+  async function entrar(email, senha) {
+    const logado = await api.post('/api/login', { email: email.trim(), senha })
     setUsuario(logado)
     return logado
   }

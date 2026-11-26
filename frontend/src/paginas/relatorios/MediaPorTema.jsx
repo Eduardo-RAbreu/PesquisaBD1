@@ -4,12 +4,10 @@ import { formatarNota } from '../../api.js'
 import { useDados } from '../../useDados.js'
 import Aviso from '../../componentes/Aviso.jsx'
 
-// Relatório 1: média de satisfação por tema, com filtro de período.
 export default function MediaPorTema() {
   const [de, setDe] = useState('')
   const [ate, setAte] = useState('')
   const [minRespostas, setMinRespostas] = useState(1)
-  // os filtros só valem depois de apertar "Filtrar"
   const [filtros, setFiltros] = useState({ de: '', ate: '', minRespostas: 1 })
 
   const params = new URLSearchParams({ minRespostas: String(filtros.minRespostas) })

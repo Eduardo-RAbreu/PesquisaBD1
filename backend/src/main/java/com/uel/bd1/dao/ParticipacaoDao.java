@@ -109,6 +109,31 @@ public class ParticipacaoDao {
         }
     }
 
+    public int inserirRetornandoId(Connection conexao, Participacao dados) throws SQLException {
+        validarParticipacao(dados);
+
+        String sql = """
+            INSERT INTO participacao (id_pesquisa, id_grupo_respondente, data_ini, data_fim)
+            VALUES (?, ?, ?, ?)
+            RETURNING id_part
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, dados.idPesquisa());
+            comando.setObject(2, dados.idGrupoRespondente(), Types.INTEGER);
+            comando.setObject(3, dados.dataIni());
+            comando.setObject(4, dados.dataFim());
+
+            try (ResultSet resultado = comando.executeQuery()) {
+                if (resultado.next()) {
+                    return resultado.getInt("id_part");
+                }
+            }
+        }
+
+        throw new SQLException("Não foi possível obter o ID da participação.");
+    }
+
     public boolean atualizar(Participacao dados) throws SQLException {
         validarParticipacao(dados);
 
@@ -184,7 +209,6 @@ public class ParticipacaoDao {
         }
     }
 
-    // CRUD das respostas; validações entre pesquisa e tipo serão feitas no Service.
     public List<Resposta> listarResposta() throws SQLException {
         List<Resposta> registros = new ArrayList<>();
         String sql = """
@@ -267,6 +291,23 @@ public class ParticipacaoDao {
                 throw new IllegalArgumentException("A participação ou a questão informada não existe.", e);
             }
             throw e;
+        }
+    }
+
+    public boolean inserirResposta(Connection conexao, Resposta dados) throws SQLException {
+        validarResposta(dados);
+
+        String sql = """
+            INSERT INTO resposta (id_part, id_questao, texto, valor_escala)
+            VALUES (?, ?, ?, ?)
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, dados.idPart());
+            comando.setInt(2, dados.idQuestao());
+            comando.setString(3, dados.texto());
+            comando.setObject(4, dados.valorEscala(), Types.SMALLINT);
+            return comando.executeUpdate() > 0;
         }
     }
 
@@ -353,7 +394,6 @@ public class ParticipacaoDao {
         }
     }
 
-    // CRUD do controle individual, separado dos dados das respostas anônimas.
     public List<ControleParticipacao> listarControle() throws SQLException {
         List<ControleParticipacao> registros = new ArrayList<>();
         String sql = """
@@ -501,6 +541,99 @@ public class ParticipacaoDao {
             }
             throw e;
         }
+    }
+
+    public boolean marcarConcluida(Connection conexao, int idUsuario, int idPesquisa)
+            throws SQLException {
+        if (idUsuario <= 0 || idPesquisa <= 0) {
+            throw new IllegalArgumentException("Informe IDs positivos para o usuário e a pesquisa.");
+        }
+
+        String sql = """
+            UPDATE controle_participacao
+            SET concluida = TRUE
+            WHERE id_usu = ? AND id_pesquisa = ? AND concluida = FALSE
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idPesquisa);
+            return comando.executeUpdate() > 0;
+        }
+    }
+
+    public void identificarParticipacao(Connection conexao, int idParticipacao, int idUsuario)
+            throws SQLException {
+        String sql = "INSERT INTO participacao_identificada(id_part,id_usu) VALUES(?,?)";
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, idParticipacao);
+            comando.setInt(2, idUsuario);
+            comando.executeUpdate();
+        }
+    }
+
+    public List<Integer> listarGruposAutorizados(Connection conexao, int idUsuario, int idPesquisa)
+            throws SQLException {
+        List<Integer> grupos = new ArrayList<>();
+        String sql = """
+            SELECT gu.id_grupo
+            FROM grupo_usuario gu
+            JOIN grupo_pesquisa gp ON gp.id_grupo = gu.id_grupo
+            WHERE gu.id_usu = ? AND gp.id_pesquisa = ?
+            ORDER BY gu.id_grupo
+            FOR SHARE OF gu, gp
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idPesquisa);
+            try (ResultSet resultado = comando.executeQuery()) {
+                while (resultado.next()) {
+                    grupos.add(resultado.getInt("id_grupo"));
+                }
+            }
+        }
+        return grupos;
+    }
+
+    public void criarControleSeAusente(Connection conexao, int idUsuario, int idPesquisa)
+            throws SQLException {
+        String sql = """
+            INSERT INTO controle_participacao (id_usu, id_pesquisa, concluida)
+            VALUES (?, ?, FALSE)
+            ON CONFLICT (id_usu, id_pesquisa) DO NOTHING
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idPesquisa);
+            comando.executeUpdate();
+        }
+    }
+
+    public ControleParticipacao buscarControleParaAtualizacao(
+            Connection conexao, int idUsuario, int idPesquisa) throws SQLException {
+        String sql = """
+            SELECT id_usu, id_pesquisa, concluida
+            FROM controle_participacao
+            WHERE id_usu = ? AND id_pesquisa = ?
+            FOR UPDATE
+            """;
+
+        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setInt(1, idUsuario);
+            comando.setInt(2, idPesquisa);
+            try (ResultSet resultado = comando.executeQuery()) {
+                if (resultado.next()) {
+                    return new ControleParticipacao(
+                        resultado.getInt("id_usu"),
+                        resultado.getInt("id_pesquisa"),
+                        resultado.getBoolean("concluida")
+                    );
+                }
+            }
+        }
+        return null;
     }
 
     private void validarControleParticipacao(ControleParticipacao dados) {

@@ -10,6 +10,7 @@ import Grupos from './paginas/Grupos.jsx'
 import Usuarios from './paginas/Usuarios.jsx'
 import Pesquisas from './paginas/Pesquisas.jsx'
 import PesquisaForm from './paginas/PesquisaForm.jsx'
+import PesquisaRespostas from './paginas/PesquisaRespostas.jsx'
 import Responder from './paginas/Responder.jsx'
 import ResponderForm from './paginas/ResponderForm.jsx'
 import Relatorios from './paginas/Relatorios.jsx'
@@ -27,7 +28,7 @@ export default function App() {
     <>
       <header className="topo">
         <Link className="marca" to="/">Pesquisas</Link>
-        <nav>
+        {usuario && <nav>
           <NavLink to="/responder">Responder</NavLink>
           <NavLink to="/pesquisas">Pesquisas</NavLink>
           <NavLink to="/questoes">Questões</NavLink>
@@ -35,7 +36,7 @@ export default function App() {
           <NavLink to="/grupos">Grupos</NavLink>
           <NavLink to="/usuarios">Usuários</NavLink>
           <NavLink to="/relatorios">Relatórios</NavLink>
-        </nav>
+        </nav>}
         <div className="conta">
           {usuario ? (
             <>
@@ -50,21 +51,22 @@ export default function App() {
 
       <main>
         <Routes>
-          <Route path="/" element={<Inicio />} />
+          <Route path="/" element={<Protegida><Inicio /></Protegida>} />
           <Route path="/login" element={<Login />} />
-          <Route path="/temas" element={<Temas />} />
-          <Route path="/questoes" element={<Questoes />} />
-          <Route path="/questoes/nova" element={<QuestaoForm />} />
-          <Route path="/questoes/:id/editar" element={<QuestaoForm />} />
-          <Route path="/grupos" element={<Grupos />} />
-          <Route path="/usuarios" element={<Usuarios />} />
-          <Route path="/pesquisas" element={<Pesquisas />} />
-          <Route path="/pesquisas/nova" element={<PesquisaForm />} />
-          <Route path="/pesquisas/:id/editar" element={<PesquisaForm />} />
+          <Route path="/temas" element={<Protegida><Temas /></Protegida>} />
+          <Route path="/questoes" element={<Protegida><Questoes /></Protegida>} />
+          <Route path="/questoes/nova" element={<Protegida><QuestaoForm /></Protegida>} />
+          <Route path="/questoes/:id/editar" element={<Protegida><QuestaoForm /></Protegida>} />
+          <Route path="/grupos" element={<Protegida><Grupos /></Protegida>} />
+          <Route path="/usuarios" element={<Protegida><Usuarios /></Protegida>} />
+          <Route path="/pesquisas" element={<Protegida><Pesquisas /></Protegida>} />
+          <Route path="/pesquisas/nova" element={<Protegida><PesquisaForm /></Protegida>} />
+          <Route path="/pesquisas/:id/editar" element={<Protegida><PesquisaForm /></Protegida>} />
+          <Route path="/pesquisas/:id/respostas" element={<Protegida><PesquisaRespostas /></Protegida>} />
           <Route path="/responder" element={<Protegida><Responder /></Protegida>} />
           <Route path="/responder/:id" element={<Protegida><ResponderForm /></Protegida>} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="*" element={<p className="vazio">Página não encontrada.</p>} />
+          <Route path="/relatorios" element={<Protegida><Relatorios /></Protegida>} />
+          <Route path="*" element={<Protegida><p className="vazio">Página não encontrada.</p></Protegida>} />
         </Routes>
       </main>
     </>

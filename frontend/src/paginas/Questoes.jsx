@@ -8,7 +8,6 @@ import SeloTipo from '../componentes/SeloTipo.jsx'
 export default function Questoes() {
   const location = useLocation()
   const { dados: questoes, erro: erroCarga, carregando, recarregar } = useDados('/api/questoes')
-  // mensagem enviada pelo formulário depois de salvar (ex.: "Questão cadastrada.")
   const [mensagem, setMensagem] = useState(location.state?.mensagem ?? '')
   const [erro, setErro] = useState('')
 

@@ -8,6 +8,7 @@ export default function Usuarios() {
   const { dados: grupos, recarregar: recarregarGrupos } = useDados('/api/grupos')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   const [idsGrupos, setIdsGrupos] = useState([])
   const [mensagem, setMensagem] = useState('')
   const [erro, setErro] = useState('')
@@ -23,9 +24,10 @@ export default function Usuarios() {
     setErro('')
     setMensagem('')
     try {
-      await api.post('/api/usuarios', { nome, email, idsGrupos })
+      await api.post('/api/usuarios', { nome, email, senha, idsGrupos })
       setNome('')
       setEmail('')
+      setSenha('')
       setIdsGrupos([])
       setMensagem('Usuário cadastrado.')
       recarregar()
@@ -53,7 +55,7 @@ export default function Usuarios() {
     <>
       <h1>Usuários</h1>
       <p className="subtitulo">
-        As pessoas que podem responder pesquisas. O e-mail é usado para entrar no sistema.
+        As pessoas que podem responder pesquisas. E-mail e senha são usados para entrar no sistema.
       </p>
 
       <Aviso tipo="sucesso">{mensagem}</Aviso>
@@ -78,13 +80,23 @@ export default function Usuarios() {
             <input
               id="emailUsuario"
               type="email"
-              maxLength={150}
+              maxLength={180}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
         </div>
+
+        <label htmlFor="senhaUsuario">Senha</label>
+        <input
+          id="senhaUsuario"
+          type="password"
+          autoComplete="new-password"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          required
+        />
 
         <span className="rotulo">Grupos</span>
         {grupos && grupos.length === 0 && (

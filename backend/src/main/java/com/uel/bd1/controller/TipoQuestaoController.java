@@ -1,6 +1,8 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.TipoQuestaoDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.model.DadosTela.TipoTela;
 import com.uel.bd1.model.TipoQuestao;
 
 import org.springframework.http.HttpStatus;
@@ -11,18 +13,20 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tipos")
+@RequestMapping({"/api/tipos", "/api/tipos-questao"})
 public class TipoQuestaoController {
 
     private final TipoQuestaoDao dao;
+    private final ConsultaDao consulta;
 
-    public TipoQuestaoController(TipoQuestaoDao dao) {
+    public TipoQuestaoController(TipoQuestaoDao dao, ConsultaDao consulta) {
         this.dao = dao;
+        this.consulta = consulta;
     }
 
     @GetMapping
-    public List<TipoQuestao> listar() throws SQLException {
-        return dao.listar();
+    public List<TipoTela> listar() throws SQLException {
+        return consulta.listarTipos();
     }
 
     @GetMapping("/{id}")

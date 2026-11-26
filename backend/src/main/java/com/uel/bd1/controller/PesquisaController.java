@@ -1,8 +1,18 @@
 package com.uel.bd1.controller;
 
 import com.uel.bd1.dao.PesquisaDao;
+import com.uel.bd1.dao.ConsultaDao;
+import com.uel.bd1.service.CadastroService;
+import com.uel.bd1.model.DadosTela.PesquisaTela;
+import com.uel.bd1.model.DadosTela.ParticipacaoTela;
+import com.uel.bd1.model.PesquisaSalvarRequest;
+import com.uel.bd1.model.EnvioRespostasRequest;
 import com.uel.bd1.model.Grupo;
-import com.uel.bd1.model.Pesquisa;
+import com.uel.bd1.model.Questao;
+import com.uel.bd1.service.ParticipacaoService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,27 +20,34 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pesquisas")
 public class PesquisaController {
 
     private final PesquisaDao dao;
+    private final ParticipacaoService pserv;
+    private final ConsultaDao consulta;
+    private final CadastroService cadastro;
 
-    public PesquisaController(PesquisaDao dao) {
+    public PesquisaController(PesquisaDao dao, ParticipacaoService pserv, ConsultaDao consulta, CadastroService cadastro) {
         this.dao = dao;
+        this.pserv = pserv;
+        this.consulta = consulta;
+        this.cadastro = cadastro;
     }
 
     @GetMapping
-    public List<Pesquisa> listar() throws SQLException {
-        return dao.listar();
+    public List<PesquisaTela> listar() throws SQLException {
+        return consulta.listarPesquisas();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pesquisa> buscarPorId(
+    public ResponseEntity<PesquisaTela> buscarPorId(
             @PathVariable("id") int id) throws SQLException {
 
-        Pesquisa registro = dao.listarID(id);
+        PesquisaTela registro = consulta.buscarPesquisa(id);
 
         if (registro == null) {
             return ResponseEntity.notFound().build();
@@ -40,43 +57,19 @@ public class PesquisaController {
     }
 
     @PostMapping
-    public ResponseEntity<String> inserir(
-            @RequestBody Pesquisa dados) throws SQLException {
-
-        boolean inseriu = dao.inserir(dados);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o registro.");
-        }
-
+    public ResponseEntity<Map<String, Object>> inserir(
+            @RequestBody PesquisaSalvarRequest dados) throws SQLException {
+        int id = cadastro.salvarPesquisa(null, dados);
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body("Registro cadastrado com sucesso.");
+            .body(Map.of("id", id, "mensagem", "Pesquisa cadastrada com sucesso."));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> atualizar(
             @PathVariable("id") int id,
-            @RequestBody Pesquisa dados) throws SQLException {
-
-        Pesquisa registro = new Pesquisa(
-            id,
-            dados.anonima(),
-            dados.dataPesquisa(),
-            dados.horaIni(),
-            dados.horaFim(),
-            dados.titulo(),
-            dados.descricao()
-        );
-
-        boolean atualizou = dao.atualizar(registro);
-
-        if (!atualizou) {
-            return ResponseEntity.notFound().build();
-        }
-
+            @RequestBody PesquisaSalvarRequest dados) throws SQLException {
+        cadastro.salvarPesquisa(id, dados);
         return ResponseEntity.noContent().build();
     }
 
@@ -100,6 +93,11 @@ public class PesquisaController {
         return ResponseEntity
             .badRequest()
             .body(e.getMessage());
+    }
+
+    @GetMapping("/{id}/participacoes")
+    public List<ParticipacaoTela> listarParticipacoes(@PathVariable("id") int id) throws SQLException {
+        return consulta.listarParticipacoesDaPesquisa(id);
     }
 
     @GetMapping("/{id}/grupos")
@@ -134,4 +132,31 @@ public class PesquisaController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/questoes")
+    public List<Questao> listarQuestoes(@PathVariable("id") int id) throws SQLException {
+        return dao.listarQuestoesDaPesquisa(id);
+    }
+
+    @PostMapping("/{id}/respostas")
+    public ResponseEntity<String> enviarRespostas(@PathVariable("id") int idPesquisa,@RequestBody EnvioRespostasRequest dados,HttpServletRequest requisicao) throws SQLException{
+        HttpSession sessao = requisicao.getSession(false);
+
+        if (sessao == null) {
+            return ResponseEntity.status(401).body("Faça login para responder.");
+        }
+
+        Integer idUsuario =
+        (Integer) sessao.getAttribute("idUsuario");
+
+        if (idUsuario == null) {
+            return ResponseEntity.status(401).body("Faça login para responder.");
+        }
+
+        pserv.enviar(idUsuario, idPesquisa, dados);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Respostas enviadas com sucesso.");
+    }
+
+
 }

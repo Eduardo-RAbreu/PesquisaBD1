@@ -4,7 +4,6 @@ import { api } from '../api.js'
 import Aviso from '../componentes/Aviso.jsx'
 import SeloTipo from '../componentes/SeloTipo.jsx'
 
-// cadastro e editar pesquisas
 export default function PesquisaForm() {
   const { id } = useParams()
   const editando = Boolean(id)
@@ -40,8 +39,8 @@ export default function PesquisaForm() {
           setHoraIni(p.horaIni)
           setHoraFim(p.horaFim)
           setAnonima(p.anonima)
-          setIdsQuestoes(p.idsQuestoes)
-          setIdsGrupos(p.idsGrupos)
+          setIdsQuestoes(p.idsQuestoes ?? [])
+          setIdsGrupos(p.idsGrupos ?? [])
         }
       } catch (e) {
         setErro(e.message)
@@ -52,7 +51,6 @@ export default function PesquisaForm() {
     carregar()
   }, [id, editando])
 
-  // marca ou desmarca um item de uma lista de IDs
   function alternar(setLista, idItem) {
     setLista((atuais) =>
       atuais.includes(idItem) ? atuais.filter((x) => x !== idItem) : [...atuais, idItem],
@@ -62,9 +60,11 @@ export default function PesquisaForm() {
   async function salvar(evento) {
     evento.preventDefault()
     setErro('')
-    // a ordem das questões na pesquisa segue a ordem da lista na tela
-    const ordenadas = questoes.filter((q) => idsQuestoes.includes(q.id)).map((q) => q.id)
-    const corpo = { titulo, descricao, dataPesquisa, horaIni, horaFim, anonima, idsQuestoes: ordenadas, idsGrupos }
+    if (!idsQuestoes.length || !idsGrupos.length) {
+      setErro('Selecione ao menos uma questão e um grupo.')
+      return
+    }
+    const corpo = { titulo, descricao, dataPesquisa, horaIni, horaFim, anonima, idsQuestoes, idsGrupos }
     try {
       if (editando) {
         await api.put(`/api/pesquisas/${id}`, corpo)
@@ -194,6 +194,33 @@ export default function PesquisaForm() {
             </label>
           ))}
         </div>
+
+        {idsQuestoes.length > 0 && (
+          <>
+            <h3>Ordem das questões</h3>
+            <ol>
+              {idsQuestoes.map((idQuestao, indice) => (
+                <li key={idQuestao}>
+                  {questoes.find((q) => q.id === idQuestao)?.descricao}
+                  {' '}
+                  <button type="button" className="link-simples" disabled={indice === 0}
+                    onClick={() => setIdsQuestoes((atuais) => {
+                      const nova = [...atuais]
+                      ;[nova[indice - 1], nova[indice]] = [nova[indice], nova[indice - 1]]
+                      return nova
+                    })}>Subir</button>
+                  {' '}
+                  <button type="button" className="link-simples" disabled={indice === idsQuestoes.length - 1}
+                    onClick={() => setIdsQuestoes((atuais) => {
+                      const nova = [...atuais]
+                      ;[nova[indice], nova[indice + 1]] = [nova[indice + 1], nova[indice]]
+                      return nova
+                    })}>Descer</button>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
 
         <div className="botoes">
           <button type="submit" className="botao">Salvar pesquisa</button>

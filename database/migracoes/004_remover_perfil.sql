@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE usuario DROP CONSTRAINT IF EXISTS ck_usuario_perfil;
+ALTER TABLE usuario DROP COLUMN IF EXISTS perfil;
+
+COMMIT;

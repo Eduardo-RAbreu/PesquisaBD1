@@ -56,7 +56,6 @@ CREATE TABLE tipo_questao (
     id_tipo_questao integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome_tipo varchar(30) NOT NULL UNIQUE,
     descricao text,
-    -- O modelo atual suporta os dois tipos pedidos no projeto.
     CONSTRAINT ck_tipo_questao CHECK (nome_tipo IN ('ESCALA', 'TEXTO'))
 );
 
@@ -101,6 +100,11 @@ CREATE TABLE participacao (
     CONSTRAINT ck_part_datas CHECK (
         data_ini IS NULL OR data_fim IS NULL OR data_fim >= data_ini
     )
+);
+
+CREATE TABLE participacao_identificada (
+    id_part integer PRIMARY KEY REFERENCES participacao(id_part) ON DELETE CASCADE,
+    id_usu integer NOT NULL REFERENCES usuario(id_usu) ON DELETE RESTRICT
 );
 
 CREATE TABLE resposta (

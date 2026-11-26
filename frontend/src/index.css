@@ -42,7 +42,7 @@ h1, h2, h3 {
 
 a { color: var(--petroleo); }
 
-/* ---------- topo ---------- */
+
 .topo {
   display: flex;
   align-items: center;
@@ -81,7 +81,7 @@ a { color: var(--petroleo); }
 }
 .link-simples:hover { color: var(--marfim-claro); }
 
-/* ---------- página ---------- */
+
 main { max-width: 64rem; margin: 2.2rem auto 3rem; padding: 0 1.5rem; }
 h1 { margin: 0 0 0.4rem; font-size: 2.1rem; font-weight: 800; }
 h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 0.4rem; }
@@ -95,7 +95,7 @@ h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 0.4rem; }
   margin-bottom: 0.4rem;
 }
 
-/* ---------- botões e foco ---------- */
+
 .botao {
   display: inline-block;
   padding: 0.6rem 1.15rem;
@@ -136,7 +136,7 @@ select:focus-visible, textarea:focus-visible {
   * { transition: none !important; }
 }
 
-/* ---------- avisos ---------- */
+
 .aviso {
   padding: 0.75rem 1rem;
   border-radius: 6px;
@@ -149,7 +149,7 @@ select:focus-visible, textarea:focus-visible {
 .dica { color: var(--tinta-suave); margin: 0.2rem 0 0; font-size: 0.92rem; }
 .dica a { color: var(--petroleo); }
 
-/* ---------- selos ---------- */
+
 .selo {
   display: inline-block;
   padding: 0.1rem 0.6rem;
@@ -163,7 +163,7 @@ select:focus-visible, textarea:focus-visible {
 .selo-neutro { background: var(--marfim); color: var(--tinta-suave); }
 .selo-ok { background: var(--petroleo); color: var(--marfim-claro); }
 
-/* ---------- tabelas ---------- */
+
 .tabela-rolagem {
   overflow-x: auto;
   background: var(--marfim-claro);
@@ -188,7 +188,7 @@ tbody tr:hover { background: var(--marfim-medio); }
 }
 .link-perigo:hover { text-decoration: underline; }
 
-/* ---------- formulários ---------- */
+
 .formulario {
   display: grid;
   gap: 0.4rem;
@@ -254,7 +254,7 @@ tbody tr:hover { background: var(--marfim-medio); }
   clip: rect(0 0 0 0);
 }
 
-/* ---------- página inicial ---------- */
+
 .hero {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
@@ -272,7 +272,7 @@ tbody tr:hover { background: var(--marfim-medio); }
 .hero .subtitulo { font-size: 1.1rem; }
 .hero-acoes { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
 
-/* bloco azul com a escala de 1 a 5, o que esta pesquisa mede */
+
 .hero-escala {
   display: flex;
   align-items: center;
@@ -323,7 +323,7 @@ tbody tr:hover { background: var(--marfim-medio); }
   font-weight: 800;
 }
 
-/* ---------- relatórios ---------- */
+
 .abas { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1.3rem; border-bottom: 2px solid var(--marfim-escuro); }
 .aba {
   padding: 0.6rem 1rem;
@@ -363,7 +363,7 @@ tbody tr:hover { background: var(--marfim-medio); }
 }
 .secao-relatorio { margin: 1.6rem 0 0.7rem; }
 
-/* ---------- responder ---------- */
+
 .folha-resposta { display: grid; gap: 1rem; max-width: 46rem; }
 .questao-resp {
   margin: 0;
@@ -391,18 +391,32 @@ tbody tr:hover { background: var(--marfim-medio); }
   background: #FBF9F5;
 }
 .nota:hover span { background: var(--petroleo-claro); }
-/* nota escolhida: coral, com texto escuro */
+
 .nota input:checked + span { background: var(--coral); border-color: var(--coral); color: var(--tinta-sobre-coral); }
 .nota input:focus-visible + span { outline: 3px solid var(--petroleo); outline-offset: 3px; }
 .escala-legenda { display: flex; justify-content: space-between; max-width: 21rem; margin-top: 0.5rem; color: var(--tinta-suave); font-size: 0.84rem; }
 
-/* ---------- telas pequenas ---------- */
+.resumo-respostas { color: var(--petroleo); }
+.lista-respostas-pesquisa { display: grid; gap: 1rem; }
+.bloco-respostas {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--marfim-escuro);
+  border-radius: 8px;
+  background: var(--marfim-claro);
+}
+.bloco-respostas h2 { overflow-wrap: anywhere; }
+.texto-resposta { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 12rem; }
+.filtros .filtro-questao-respostas { max-width: 100%; }
+.filtros .filtro-questao-respostas select { width: 100%; min-width: 0; max-width: 40rem; }
+
+
 @media (max-width: 48rem) {
   .hero { grid-template-columns: 1fr; }
   .hero-escala { min-height: 9rem; }
 }
 @media (max-width: 40rem) {
-  /* topo: marca e conta na primeira linha, menu em uma linha que rola para o lado */
+
   .topo { gap: 0.4rem 0.8rem; flex-wrap: wrap; padding: 0.7rem 1rem 0; }
   .marca { order: 1; }
   .conta { order: 2; margin-left: auto; }

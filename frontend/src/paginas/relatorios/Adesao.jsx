@@ -4,13 +4,10 @@ import { formatarData } from '../../api.js'
 import { useDados } from '../../useDados.js'
 import Aviso from '../../componentes/Aviso.jsx'
 
-// Relatório 5: quem já respondeu e quem ainda não respondeu uma pesquisa.
-// Usa só o registro de "quem respondeu"; as respostas em si não entram aqui.
 export default function Adesao() {
   const [escolhida, setEscolhida] = useState('')
   const { dados: pesquisas } = useDados('/api/pesquisas')
 
-  // enquanto ninguém escolhe, usa a pesquisa mais recente da lista
   const idPesquisa = escolhida || (pesquisas && pesquisas.length > 0 ? String(pesquisas[0].id) : '')
   const { dados, erro, carregando } = useDados(
     idPesquisa ? `/api/relatorios/adesao?idPesquisa=${idPesquisa}` : null,

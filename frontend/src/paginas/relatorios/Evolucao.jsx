@@ -4,14 +4,12 @@ import { formatarData, formatarNota } from '../../api.js'
 import { useDados } from '../../useDados.js'
 import Aviso from '../../componentes/Aviso.jsx'
 
-// Relatório 3: evolução da média pesquisa a pesquisa, comparada com a média geral.
 export default function Evolucao() {
   const [idTema, setIdTema] = useState('')
   const { dados: temas } = useDados('/api/temas')
   const url = '/api/relatorios/evolucao' + (idTema ? `?idTema=${idTema}` : '')
   const { dados, erro, carregando } = useDados(url)
 
-  // o eixo X mostra só dia/mês
   const linhas = (dados ?? []).map((d) => ({ ...d, rotulo: formatarData(d.dataPesquisa).slice(0, 5) }))
 
   return (

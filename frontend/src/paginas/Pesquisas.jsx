@@ -72,6 +72,7 @@ export default function Pesquisas() {
                     </span>
                   </td>
                   <td className="acoes">
+                    <Link to={`/pesquisas/${p.id}/respostas`}>Ver respostas</Link>
                     <Link to={`/pesquisas/${p.id}/editar`}>Editar</Link>
                     <button type="button" className="link-perigo" onClick={() => excluir(p)}>
                       Excluir

@@ -10,7 +10,6 @@ function cortar(texto, max) {
   return texto.length > max ? `${texto.slice(0, max - 1)}…` : texto
 }
 
-// Relatório 4: ranking das questões mais bem (ou pior) avaliadas.
 export default function RankingQuestoes() {
   const [form, setForm] = useState(FILTROS_INICIAIS)
   const [filtros, setFiltros] = useState(FILTROS_INICIAIS)
@@ -47,7 +46,6 @@ export default function RankingQuestoes() {
     })
   }
 
-  // em tela estreita, os rótulos do gráfico ficam mais curtos (o texto inteiro está na tabela)
   const estreito = typeof window !== 'undefined' && window.innerWidth < 700
   const larguraRotulo = estreito ? 120 : 270
   const barras = (dados ?? []).map((q) => ({
