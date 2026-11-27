@@ -6,13 +6,8 @@ import com.uel.bd1.service.CadastroService;
 import com.uel.bd1.model.DadosTela.PesquisaTela;
 import com.uel.bd1.model.DadosTela.ParticipacaoTela;
 import com.uel.bd1.model.PesquisaSalvarRequest;
-import com.uel.bd1.model.EnvioRespostasRequest;
 import com.uel.bd1.model.Grupo;
 import com.uel.bd1.model.Questao;
-import com.uel.bd1.service.ParticipacaoService;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +22,11 @@ import java.util.Map;
 public class PesquisaController {
 
     private final PesquisaDao dao;
-    private final ParticipacaoService pserv;
     private final ConsultaDao consulta;
     private final CadastroService cadastro;
 
-    public PesquisaController(PesquisaDao dao, ParticipacaoService pserv, ConsultaDao consulta, CadastroService cadastro) {
+    public PesquisaController(PesquisaDao dao, ConsultaDao consulta, CadastroService cadastro) {
         this.dao = dao;
-        this.pserv = pserv;
         this.consulta = consulta;
         this.cadastro = cadastro;
     }
@@ -105,58 +98,9 @@ public class PesquisaController {
         return dao.listarGrupos(id);
     }
 
-    @PostMapping("/{id}/{idg}")
-    public ResponseEntity<String> inserirUsuario(@PathVariable("id") int id, @PathVariable("idg") int idg) throws SQLException {
-
-        boolean inseriu = dao.adicionarGrupo(idg, id);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o grupo na pesquisa.");
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body("Grupo cadastrado com sucesso na pesquisa.");
-    }
-
-     @DeleteMapping("/{id}/{idg}")
-    public ResponseEntity<Void> deletarGrupo(@PathVariable("id") int id, @PathVariable("idg") int idg) throws SQLException {
-
-        boolean deletou = dao.removerGrupo(idg, id);
-
-        if (!deletou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/{id}/questoes")
     public List<Questao> listarQuestoes(@PathVariable("id") int id) throws SQLException {
         return dao.listarQuestoesDaPesquisa(id);
     }
-
-    @PostMapping("/{id}/respostas")
-    public ResponseEntity<String> enviarRespostas(@PathVariable("id") int idPesquisa,@RequestBody EnvioRespostasRequest dados,HttpServletRequest requisicao) throws SQLException{
-        HttpSession sessao = requisicao.getSession(false);
-
-        if (sessao == null) {
-            return ResponseEntity.status(401).body("Faça login para responder.");
-        }
-
-        Integer idUsuario =
-        (Integer) sessao.getAttribute("idUsuario");
-
-        if (idUsuario == null) {
-            return ResponseEntity.status(401).body("Faça login para responder.");
-        }
-
-        pserv.enviar(idUsuario, idPesquisa, dados);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Respostas enviadas com sucesso.");
-    }
-
 
 }

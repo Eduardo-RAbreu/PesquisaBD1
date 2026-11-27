@@ -106,32 +106,4 @@ public class GrupoController {
         return dao.listarUsuarios(id);
     }
 
-    @PostMapping("/{id}/{idu}")
-    public ResponseEntity<String> inserirUsuario(@PathVariable("id") int id, @PathVariable("idu") int idu) throws SQLException {
-
-        boolean inseriu = dao.adicionarUsuario(id, idu);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o usuario no grupo.");
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body("Usuario cadastrado com sucesso no grupo.");
-    }
-
-     @DeleteMapping("/{id}/{idu}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable("id") int id, @PathVariable("idu") int idu) throws SQLException {
-
-        boolean deletou = dao.removerUsuario(id, idu);
-
-        if (!deletou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
 }

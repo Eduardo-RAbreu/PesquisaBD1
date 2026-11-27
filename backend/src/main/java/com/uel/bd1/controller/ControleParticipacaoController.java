@@ -3,7 +3,6 @@ package com.uel.bd1.controller;
 import com.uel.bd1.dao.ParticipacaoDao;
 import com.uel.bd1.model.ControleParticipacao;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,58 +36,6 @@ public class ControleParticipacaoController {
         }
 
         return ResponseEntity.ok(registro);
-    }
-
-    @PostMapping
-    public ResponseEntity<String> inserir(
-            @RequestBody ControleParticipacao dados) throws SQLException {
-
-        boolean inseriu = dao.inserirControle(dados);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o registro.");
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body("Registro cadastrado com sucesso.");
-    }
-
-    @PutMapping("/{idUsu}/{idPesquisa}")
-    public ResponseEntity<Void> atualizar(
-            @PathVariable("idUsu") int idUsu,
-            @PathVariable("idPesquisa") int idPesquisa,
-            @RequestBody ControleParticipacao dados) throws SQLException {
-
-        ControleParticipacao registro = new ControleParticipacao(
-            idUsu,
-            idPesquisa,
-            dados.concluida()
-        );
-
-        boolean atualizou = dao.atualizarControle(registro);
-
-        if (!atualizou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{idUsu}/{idPesquisa}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable("idUsu") int idUsu,
-            @PathVariable("idPesquisa") int idPesquisa) throws SQLException {
-
-        boolean deletou = dao.deletarControle(idUsu, idPesquisa);
-
-        if (!deletou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

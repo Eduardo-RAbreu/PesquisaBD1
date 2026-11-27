@@ -130,17 +130,55 @@ public class QuestaoDao {
             WHERE id_questao = ?
             """;
 
-        try (
-            Connection conexao = dataSource.getConnection();
-            PreparedStatement comando = conexao.prepareStatement(sql)
-        ) {
-            comando.setInt(1, q.idTema());
-            comando.setInt(2, q.idTipoQuestao());
-            comando.setString(3, q.descricao());
-            comando.setInt(4, q.idQuestao());
+        try (Connection conexao = dataSource.getConnection()) {
+            conexao.setAutoCommit(false);
+            try {
+                int tipoAtual;
+                try (PreparedStatement comando = conexao.prepareStatement(
+                        "SELECT id_tipo_questao FROM questao WHERE id_questao = ? FOR UPDATE")) {
+                    comando.setInt(1, q.idQuestao());
+                    try (ResultSet resultado = comando.executeQuery()) {
+                        if (!resultado.next()) {
+                            conexao.rollback();
+                            return false;
+                        }
+                        tipoAtual = resultado.getInt("id_tipo_questao");
+                    }
+                }
 
-            return comando.executeUpdate() > 0;
+                if (tipoAtual != q.idTipoQuestao()) {
+                    try (PreparedStatement comando = conexao.prepareStatement(
+                            "SELECT EXISTS (SELECT 1 FROM resposta WHERE id_questao = ?)")) {
+                        comando.setInt(1, q.idQuestao());
+                        try (ResultSet resultado = comando.executeQuery()) {
+                            resultado.next();
+                            if (resultado.getBoolean(1)) {
+                                throw new IllegalArgumentException(
+                                    "Não é possível alterar o tipo de uma questão que já possui respostas."
+                                );
+                            }
+                        }
+                    }
+                }
 
+                boolean atualizou;
+                try (PreparedStatement comando = conexao.prepareStatement(sql)) {
+                    comando.setInt(1, q.idTema());
+                    comando.setInt(2, q.idTipoQuestao());
+                    comando.setString(3, q.descricao());
+                    comando.setInt(4, q.idQuestao());
+                    atualizou = comando.executeUpdate() > 0;
+                }
+                conexao.commit();
+                return atualizou;
+            } catch (SQLException | RuntimeException e) {
+                try {
+                    conexao.rollback();
+                } catch (SQLException erroRollback) {
+                    e.addSuppressed(erroRollback);
+                }
+                throw e;
+            }
         } catch (SQLException e) {
             if ("23503".equals(e.getSQLState())) {
                 throw new IllegalArgumentException(

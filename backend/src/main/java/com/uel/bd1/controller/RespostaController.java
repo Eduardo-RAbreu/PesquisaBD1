@@ -3,7 +3,6 @@ package com.uel.bd1.controller;
 import com.uel.bd1.dao.ParticipacaoDao;
 import com.uel.bd1.model.Resposta;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,58 +35,6 @@ public class RespostaController {
         }
 
         return ResponseEntity.ok(registro);
-    }
-
-    @PostMapping
-    public ResponseEntity<String> inserir(
-            @RequestBody Resposta dados) throws SQLException {
-
-        boolean inseriu = dao.inserirResposta(dados);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o registro.");
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body("Registro cadastrado com sucesso.");
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(
-            @PathVariable("id") int id,
-            @RequestBody Resposta dados) throws SQLException {
-
-        Resposta registro = new Resposta(
-            id,
-            dados.idPart(),
-            dados.idQuestao(),
-            dados.texto(),
-            dados.valorEscala()
-        );
-
-        boolean atualizou = dao.atualizarResposta(registro);
-
-        if (!atualizou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable("id") int id) throws SQLException {
-
-        boolean deletou = dao.deletarResposta(id);
-
-        if (!deletou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

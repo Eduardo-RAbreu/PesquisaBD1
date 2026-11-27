@@ -5,7 +5,6 @@ import com.uel.bd1.dao.ConsultaDao;
 import com.uel.bd1.model.DadosTela.TipoTela;
 import com.uel.bd1.model.TipoQuestao;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,56 +39,6 @@ public class TipoQuestaoController {
         }
 
         return ResponseEntity.ok(registro);
-    }
-
-    @PostMapping
-    public ResponseEntity<String> inserir(
-            @RequestBody TipoQuestao dados) throws SQLException {
-
-        boolean inseriu = dao.inserir(dados);
-
-        if (!inseriu) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível cadastrar o registro.");
-        }
-
-        return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body("Registro cadastrado com sucesso.");
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizar(
-            @PathVariable("id") int id,
-            @RequestBody TipoQuestao dados) throws SQLException {
-
-        TipoQuestao registro = new TipoQuestao(
-            id,
-            dados.nomeTipo(),
-            dados.descricao()
-        );
-
-        boolean atualizou = dao.atualizar(registro);
-
-        if (!atualizou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable("id") int id) throws SQLException {
-
-        boolean deletou = dao.deletar(id);
-
-        if (!deletou) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

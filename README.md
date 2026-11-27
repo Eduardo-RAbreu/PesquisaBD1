@@ -1,4 +1,3 @@
-# PesquisaBD1
 Trabalho da disciplina de Banco de Dados, fazendo sobre o tema 4 (Pesquisa)
 
 Participantes:
@@ -9,83 +8,207 @@ Caio Eduardo Rossate
 
 Natureza: Pesquisa de satisfação ou de opinião
 
-## Executar localmente
+Executar o schema e depois o carga sql,preencher o .env, rodar o backend e depois usar npm run dev no frontend
 
-Requisitos: PostgreSQL com `pgcrypto`, JDK 17 ou superior, Node.js 22.12 ou superior e npm.
+## Relatórios
 
-### Banco
+As consultas estão em [database/relatorios.sql](database/relatorios.sql). Abaixo estão as versões
+básicas, sem os filtros opcionais acrescentados pelo DAO. Os símbolos `?` são parâmetros
+preenchidos pelo `PreparedStatement`; para executar no pgAdmin, substitua-os por valores.
 
-Crie o banco indicado em `DB_URL`. Em um banco vazio, execute pelo pgAdmin, nesta ordem:
+### 1. Média por tema
 
-1. `database/schema.sql`
-2. `database/carga.sql`
+Objetivo: comparar a satisfação dos participantes em cada tema, como Infraestrutura, Atendimento e Ensino.
 
-Se o banco já foi criado com uma versão anterior do schema, execute apenas
-`database/migracoes/001_participacao_identificada.sql` e depois
-`database/migracoes/004_remover_perfil.sql`. Elas acrescentam a identificação de participações
-não anônimas e retiram o antigo campo de perfil. As migrações 002 e 003 são históricas e
-não são necessárias para chegar ao modelo atual.
+O relatório calcula a média das notas de escala e apresenta a quantidade de respostas de cada tema. As respostas de texto não entram no cálculo. É possível filtrar pelo período das pesquisas e definir uma quantidade mínima de respostas.
 
-Os usuários da carga têm a senha de teste `Teste123!`. A carga inclui pesquisas com notas
-variadas para os cinco relatórios e uma pesquisa aberta no dia da execução. São 20 usuários,
-5 pesquisas, 30 questões e 473 respostas, atendendo à referência de volume do trabalho.
-Veja [os resultados esperados da carga](docs/CARGA_RELATORIOS.md) para conferir os testes.
+O gráfico de barras permite comparar as médias, enquanto a tabela apresenta os valores e as contagens. Quanto maior a média, melhor foi a avaliação daquele tema.
 
-### Backend
+Recursos SQL utilizados: JOIN, WHERE, filtros por data, AVG, COUNT, GROUP BY, HAVING, ORDER BY, ROUND e COALESCE.
 
-Configure `backend/.env` usando `backend/.env.example`, com `DB_URL`, `DB_USER` e `DB_PASSWORD`.
-Não versione o `.env`.
+![Média por tema](docs/Imagens/Relatorio1.jpeg)
 
-Abra a pasta `PesquisaBD1` no VS Code, selecione **Executar e Depurar > Iniciar backend** e pressione F5.
-A configuração `.vscode/launch.json` carrega o `.env`. A API usa a porta 8080 por padrão.
+**SQL utilizado**
 
-Se preferir Maven, disponibilize as três variáveis no ambiente do terminal e execute
-`./mvnw.cmd spring-boot:run` dentro de `backend`. O Maven e o Spring não carregam o `.env` automaticamente.
-
-### Frontend
-
-No terminal, dentro de `frontend`:
-
-```powershell
-npm ci
-npm run dev
+```sql
+Select
+    t.id_tema,
+    t.nome_tema,
+    coalesce(round(avg(r.valor_escala), 2), 0) as media,
+    count(r.id_resposta) as total_respostas
+from tema t
+join questao q on q.id_tema = t.id_tema
+join tipo_questao tq on tq.id_tipo_questao = q.id_tipo_questao
+join resposta r on r.id_questao = q.id_questao
+join participacao par on par.id_part = r.id_part
+join pesquisa p on p.id_pesquisa = par.id_pesquisa
+where tq.nome_tipo = 'ESCALA' and r.valor_escala is not null
+group by t.id_tema, t.nome_tema
+having count(r.id_resposta) >= ?
+order by t.nome_tema, t.id_tema;
 ```
 
-Abra o endereço informado pelo Vite, normalmente `http://localhost:5173`.
-O proxy `/api` encaminha as chamadas para `http://localhost:8080`, incluindo o cookie de sessão.
-É possível definir `BACKEND_URL` no ambiente do Vite para usar outra porta do backend.
+Na consulta básica, o parâmetro é o mínimo de respostas. Se o período for preenchido, o DAO
+acrescenta `and p.data_pesquisa >= ?` e/ou `and p.data_pesquisa <= ?` antes do `group by`.
 
-## Fluxos integrados
+### 2. Comparação entre grupos
 
-Todas as funcionalidades exigem login. Todos os usuários possuem o
-mesmo acesso aos menus, cadastros e montagem de pesquisas. Não existe distinção de administrador.
-O backend exige uma sessão válida em todas as chamadas da API, exceto no login; sem sessão,
-retorna 401. Para responder, continuam valendo os grupos autorizados e a janela de horário.
+Objetivo: comparar as avaliações feitas pelos grupos de respondentes, como Estudantes, Professores e Funcionários.
 
-O cadastro de usuário contém nome, e-mail e senha, sem perfil ou permissões por função.
-Em bancos existentes, `004_remover_perfil.sql` remove a coluna antiga sem alterar senhas.
+O relatório apresenta a média das notas e a quantidade de respostas de escala de cada grupo. A resposta é atribuída ao grupo registrado na participação. É possível consultar todas as pesquisas ou selecionar uma pesquisa específica.
 
-- Cadastro e consulta de temas, grupos e questões, com contagens e nomes das classificações.
-- Cadastro de usuário com senha e grupos em uma única transação.
-- Login por e-mail e senha, recuperação da sessão ao recarregar e logout.
-- Cadastro e edição de pesquisa com grupos, questões e ordenação em uma única transação.
-- Listagem das pesquisas destinadas aos grupos do usuário, com situação e conclusão.
-- Formulário ordenado, com questões de texto e escala e seleção do grupo respondente quando necessária.
-- Envio completo com autorização, horário, validação, bloqueio de reenvio e transação.
-- Respostas anônimas sem vínculo individual; respostas identificadas com vínculo em `participacao_identificada`.
-- Em **Pesquisas > Ver respostas**, consulta das notas e textos por questão, com filtro e atualização.
-- Pesquisas não anônimas mostram o nome de quem respondeu e permitem filtrar por respondente;
-  participações antigas sem identificação salva são indicadas como identificação não registrada.
+O gráfico de barras compara as médias dos grupos. A tabela também mostra os grupos sem notas, identificados como “sem respostas”.
 
-Pesquisas que já receberam participações não podem ser editadas pelo cadastro composto.
-Todas as questões do formulário são obrigatórias. A janela de participação usa o fuso
-`America/Sao_Paulo`, incluindo o início e excluindo o instante final.
+Recursos SQL utilizados: LEFT JOIN, JOIN, subconsulta com IN, AVG, COUNT, GROUP BY, ORDER BY, ROUND e COALESCE. Quando uma pesquisa é selecionada, são acrescentados os filtros correspondentes.
 
-Os cinco relatórios estão integrados com DAO, service e controller: média por tema, comparação
-por grupo, evolução, ranking e adesão. Consulte [o roteiro dos relatórios](docs/RELATORIOS.md)
-para entender os filtros, os cálculos e como testar.
+![Comparação entre grupos](docs/Imagens/Relatorio2.jpeg)
 
-## Conferir as funcionalidades
+**SQL utilizado**
 
-Consulte [o roteiro de testes](docs/TESTES_INTEGRACAO.md) para repetir a validação pela interface,
-verificar os resultados esperados e consultar a matriz do que já foi testado.
+```sql
+Select
+    g.id_grupo,
+    g.nome_grupo,
+    coalesce(round(avg(r.valor_escala), 2), 0) as media,
+    count(r.valor_escala) as total_respostas
+from grupo g
+left join participacao par on par.id_grupo_respondente = g.id_grupo
+left join resposta r on r.id_part = par.id_part
+   and r.id_questao in (
+       select q.id_questao
+       from questao q
+       join tipo_questao tq on tq.id_tipo_questao = q.id_tipo_questao
+       where tq.nome_tipo = 'ESCALA'
+   )
+group by g.id_grupo, g.nome_grupo
+order by g.nome_grupo, g.id_grupo;
+```
+
+Esta versão considera todas as pesquisas. Quando uma pesquisa é selecionada, o DAO acrescenta
+`and par.id_pesquisa = ?` ao `left join participacao` e restringe os grupos com
+`where g.id_grupo in (select gp.id_grupo from grupo_pesquisa gp where gp.id_pesquisa = ?)`.
+
+### 3. Evolução no tempo
+
+Objetivo: acompanhar como a satisfação mudou de uma pesquisa para outra.
+
+O relatório calcula a média das notas de cada pesquisa e apresenta os resultados em ordem de data. Também mostra a média geral das notas consideradas, permitindo comparar cada pesquisa com essa referência. É possível selecionar um tema ou considerar todos.
+
+O gráfico de linhas mostra a evolução das médias. A tabela apresenta o título, a data, a média da pesquisa, a média geral e a quantidade de participações com notas no filtro. Pesquisas sem notas não aparecem no resultado.
+
+A média geral é calculada sobre todas as notas selecionadas, considerando suas quantidades, e não pela média das médias das pesquisas.
+
+Recursos SQL utilizados: WITH, JOIN, WHERE, subconsulta, AVG, COUNT(DISTINCT), GROUP BY, ORDER BY, ROUND e COALESCE.
+
+![Evolução no tempo](docs/Imagens/Relatorio3.jpeg)
+
+**SQL utilizado**
+
+```sql
+with notas as (
+    select p.id_pesquisa, p.titulo, p.data_pesquisa, par.id_part, r.valor_escala
+    from pesquisa p
+    join participacao par on par.id_pesquisa = p.id_pesquisa
+    join resposta r on r.id_part = par.id_part
+    join questao q on q.id_questao = r.id_questao
+    join tipo_questao tq on tq.id_tipo_questao = q.id_tipo_questao
+    where tq.nome_tipo = 'ESCALA' and r.valor_escala is not null
+)
+select
+    id_pesquisa,
+    titulo,
+    data_pesquisa,
+    coalesce(round(avg(valor_escala), 2), 0) as media,
+    count(distinct id_part) as participacoes,
+    coalesce(round((select avg(valor_escala) from notas), 2), 0) as media_geral
+from notas
+group by id_pesquisa, titulo, data_pesquisa
+order by data_pesquisa, id_pesquisa;
+```
+
+Esta versão considera todos os temas. Ao selecionar um tema, o DAO acrescenta
+`and q.id_tema = ?` dentro da consulta `notas`, antes do fechamento do `with`.
+
+### 4. Ranking de questões
+
+Objetivo: identificar as questões de escala com as melhores ou as piores avaliações.
+
+O relatório calcula a média e a quantidade de respostas de cada questão, organizando os resultados em um ranking. É possível escolher a ordem, buscar uma palavra no enunciado, selecionar temas, estabelecer um mínimo de respostas e limitar a quantidade de questões exibidas.
+
+O gráfico de barras facilita a comparação das notas. A tabela apresenta a posição, o enunciado, o tema, a média e a quantidade de respostas. Questões com a mesma média recebem a mesma posição no ranking.
+
+Recursos SQL utilizados: JOIN, WHERE, LIKE, LOWER, IN, AVG, COUNT, GROUP BY, HAVING, RANK() OVER, ORDER BY, LIMIT, ROUND e COALESCE.
+
+![Ranking de questões](docs/Imagens/Relatorio4.jpeg)
+
+**SQL utilizado**
+
+```sql
+Select
+    rank() over (order by avg(r.valor_escala) desc) as posicao,
+    q.id_questao,
+    q.descricao,
+    t.id_tema,
+    t.nome_tema,
+    coalesce(round(avg(r.valor_escala), 2), 0) as media,
+    count(r.id_resposta) as total_respostas
+from questao q
+join tema t on t.id_tema = q.id_tema
+join tipo_questao tq on tq.id_tipo_questao = q.id_tipo_questao
+join resposta r on r.id_questao = q.id_questao
+where tq.nome_tipo = 'ESCALA' and r.valor_escala is not null
+  and lower(q.descricao) like lower(?) escape '!'
+group by q.id_questao, q.descricao, t.id_tema, t.nome_tema
+having count(r.id_resposta) >= ?
+order by posicao, q.id_questao
+limit ?;
+```
+
+Os parâmetros são, nesta ordem: busca, mínimo de respostas e limite. Uma busca por
+`atendimento`, por exemplo, utiliza `%atendimento%`; sem busca, utiliza `%%`.
+Para mostrar as piores avaliações, o DAO usa `asc` no lugar de `desc` no `rank`.
+Quando há temas selecionados, acrescenta `and q.id_tema in (?, ...)` antes do `group by`.
+
+### 5. Quem respondeu
+
+Objetivo: acompanhar a participação dos usuários em uma pesquisa e identificar quem ainda não respondeu.
+
+Após selecionar uma pesquisa, o relatório apresenta, por grupo, quantos usuários deveriam responder, quantos concluíram e quantos estão pendentes. O gráfico compara os participantes esperados com os que já responderam. A tabela lista o nome e o e-mail dos pendentes.
+
+A consulta utiliza o controle de participação, sem associar os usuários ao conteúdo das respostas anônimas. Um usuário pertencente a vários grupos pode ser contado em cada grupo, mas aparece apenas uma vez na lista de pendentes. As contagens consideram a composição atual dos grupos.
+
+Recursos SQL utilizados: JOIN, LEFT JOIN, WHERE, COUNT, CASE, DISTINCT, GROUP BY, ORDER BY e IS NULL.
+
+![Quem respondeu](docs/Imagens/Relatorio5.jpeg)
+
+**SQL utilizado**
+
+Contagem por grupo:
+
+```sql
+SELECT g.id_grupo, g.nome_grupo, count(gu.id_usu) as esperados,
+       count(case when cp.concluida = true then gu.id_usu end) as respondidos,
+       count(gu.id_usu) - count(case when cp.concluida = true then gu.id_usu end) as pendentes
+FROM grupo_pesquisa gp
+JOIN grupo g ON g.id_grupo = gp.id_grupo
+LEFT JOIN grupo_usuario gu ON gu.id_grupo = g.id_grupo
+LEFT JOIN controle_participacao cp ON cp.id_usu = gu.id_usu AND cp.id_pesquisa = gp.id_pesquisa
+WHERE gp.id_pesquisa = ?
+GROUP BY g.id_grupo, g.nome_grupo
+ORDER BY g.nome_grupo, g.id_grupo;
+```
+
+Lista de pendentes:
+
+```sql
+SELECT DISTINCT u.id_usu, u.nome, u.email
+FROM grupo_pesquisa gp
+JOIN grupo_usuario gu ON gu.id_grupo = gp.id_grupo
+JOIN usuario u ON u.id_usu = gu.id_usu
+LEFT JOIN controle_participacao cp ON cp.id_usu = u.id_usu AND cp.id_pesquisa = gp.id_pesquisa
+WHERE gp.id_pesquisa = ? AND (cp.concluida = false OR cp.id_usu IS NULL)
+ORDER BY u.nome, u.id_usu;
+```
+
+As duas consultas recebem o ID da pesquisa selecionada. A primeira produz as contagens
+usadas pelo gráfico; a segunda produz a tabela de pendentes, sem repetir usuários.

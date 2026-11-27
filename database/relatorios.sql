@@ -1,4 +1,4 @@
-
+-- Relatório 1 - Média por tema.
 Select
     t.id_tema,
     t.nome_tema,
@@ -15,6 +15,7 @@ group by t.id_tema, t.nome_tema
 having count(r.id_resposta) >= ?
 order by t.nome_tema, t.id_tema;
 
+-- Relatório 2 - Comparação entre grupos.
 Select
     g.id_grupo,
     g.nome_grupo,
@@ -32,6 +33,7 @@ left join resposta r on r.id_part = par.id_part
 group by g.id_grupo, g.nome_grupo
 order by g.nome_grupo, g.id_grupo;
 
+-- Relatório 3 - Evolução no tempo.
 with notas as (
     select p.id_pesquisa, p.titulo, p.data_pesquisa, par.id_part, r.valor_escala
     from pesquisa p
@@ -52,6 +54,7 @@ from notas
 group by id_pesquisa, titulo, data_pesquisa
 order by data_pesquisa, id_pesquisa;
 
+-- Relatório 4 - Ranking de questões.
 Select
     rank() over (order by avg(r.valor_escala) desc) as posicao,
     q.id_questao,
@@ -71,6 +74,7 @@ having count(r.id_resposta) >= ?
 order by posicao, q.id_questao
 limit ?;
 
+-- Relatório 5 - Quem respondeu: contagem por grupo.
 SELECT g.id_grupo, g.nome_grupo, count(gu.id_usu) as esperados,
        count(case when cp.concluida = true then gu.id_usu end) as respondidos,
        count(gu.id_usu) - count(case when cp.concluida = true then gu.id_usu end) as pendentes
@@ -82,6 +86,7 @@ WHERE gp.id_pesquisa = ?
 GROUP BY g.id_grupo, g.nome_grupo
 ORDER BY g.nome_grupo, g.id_grupo;
 
+-- Relatório 5 - Quem respondeu: lista de pendentes.
 SELECT DISTINCT u.id_usu, u.nome, u.email
 FROM grupo_pesquisa gp
 JOIN grupo_usuario gu ON gu.id_grupo = gp.id_grupo
