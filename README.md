@@ -10,6 +10,10 @@ Natureza: Pesquisa de satisfação ou de opinião
 
 Executar o schema e depois o carga sql,preencher o .env, rodar o backend e depois usar npm run dev no frontend
 
+Fazer Login com conta exemplo
+email: eduardo.uel@uel.br
+senha: Teste123!
+
 ## Relatórios
 
 As consultas estão em [database/relatorios.sql](database/relatorios.sql). Abaixo estão as versões
